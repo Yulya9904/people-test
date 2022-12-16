@@ -6,17 +6,17 @@ spl_autoload_register(function ($class) {
 	if (file_exists($path)) require_once $path;
 }, true, true);
 
-use Person\Services\PersonService;
+use User\Services\UserService;
 
 
 $args = $_SERVER['argv'];
 $separatorType = $args[1] ?? null;
 $action        = $args[2] ?? null;
 
-if(!in_array($separatorType, array_keys(PersonService::SEPARATORS)) || !in_array($action, PersonService::ACTIONS)){
+if(!in_array($separatorType, array_keys(UserService::SEPARATORS)) || !in_array($action, UserService::ACTIONS)){
 	print 'Для корректной работы утилиты необходимо передать два параметра: разделитель (comma, semilocon) и действие, которое требуется выполнить (countAverageLineCount, replaceDates)';
 }
-$personService = new PersonService($separatorType);
+$personService = new UserService($separatorType);
 switch ($action) {
     case 'countAverageLineCount':
         $personService->countAverageLineCount();

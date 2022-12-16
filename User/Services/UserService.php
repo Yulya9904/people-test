@@ -1,13 +1,13 @@
 <?php
 
-namespace Person\Services;
+namespace User\Services;
 
-use Person\Entities\Person;
+use User\Entities\User;
 
-class PersonService
+class UserService
 {
     private $people = [];
-    const PATH_TO_FILE_WITH_PEOPLES = '././data/people.csv';
+    const PATH_TO_FILE_WITH_PEOPLE = '././data/people.csv';
     const PATH_TO_TEXTS_FOLDER = 'data/texts';
     const PATH_TO_OUTPUT_TEXTS_FOLDER = 'data/output_texts';
 
@@ -25,26 +25,26 @@ class PersonService
     {
         $separator = self::SEPARATORS['semicolon'];
         // fetch Peoples From Csv File
-        if (($handle = fopen(self::PATH_TO_FILE_WITH_PEOPLES, "r")) !== FALSE) {
+        if (($handle = fopen(self::PATH_TO_FILE_WITH_PEOPLE, "r")) !== FALSE) {
             while (($line = fgetcsv($handle, 1000, $separator)) !== FALSE) {
-                $person = new Person();
-                $person->setId((int) $line[0]);
-                $person->setName($line[1]);
-                $this->people[] = $person;
+                $user = new User();
+                $user->setId((int) $line[0]);
+                $user->setName($line[1]);
+                $this->people[] = $user;
             }
             fclose($handle);
         }
     }
 
     /**
-     * getPathsArrayByPersonId
+     * getPathsArrayByUserId
      *
-     * @param  int $personId
+     * @param  int $userId
      * @return array
      */
-    public function getPathsArrayByPersonId(int $personId): array
+    public function getPathsArrayByUserId(int $userId): array
     {
-        $pathsArray = glob(self::PATH_TO_TEXTS_FOLDER . '/' . $personId . "-00[1-9].txt");
+        $pathsArray = glob(self::PATH_TO_TEXTS_FOLDER . '/' . $userId . "-00[1-9].txt");
         return $pathsArray ? $pathsArray : [];
     }
 
@@ -55,15 +55,15 @@ class PersonService
      */
     public function countAverageLineCount(): void
     {
-        print 'Среднее количество строк в тексте в каждом файле' . PHP_EOL;
-        foreach ($this->people as $person) {
+        print 'Среднее количество строк в файлах пользователя' . PHP_EOL;
+        foreach ($this->people as $user) {
             $lineQuantity = 0;
-            $pathsArray = $this->getPathsArrayByPersonId($person->getId());
+            $pathsArray = $this->getPathsArrayByUserId($user->getId());
             foreach ($pathsArray as $path) {
                 $lines = file($path);
                 $lineQuantity = $lineQuantity + count($lines);
             }
-            print $person->getName() . ' - ' . ($pathsArray ? round($lineQuantity / count($pathsArray)) : 0) . PHP_EOL;
+            print $user->getName() . ' - ' . ($pathsArray ? round($lineQuantity / count($pathsArray)) : 0) . PHP_EOL;
         }
     }
 
@@ -74,21 +74,21 @@ class PersonService
      */
     public function replaceDates(): void
     {
-        print 'Количество замен формата даты для каждого сотрудника' . PHP_EOL;
-        foreach ($this->people as $person) {
+        print 'Количество замен формата даты для каждого пользователя' . PHP_EOL;
+        foreach ($this->people as $user) {
             $changesQuantity = 0;
-            $pathsArray = $this->getPathsArrayByPersonId($person->getId());
+            $pathsArray = $this->getPathsArrayByUserId($user->getId());
             foreach ($pathsArray as $path) {
                 $fileContent = file_get_contents($path); // получаем содержимое файла
                 // произведем замену по регулярному выражению
                 $pattern = "/(\d{2})\/(0\d|1[0,1,2])\/(\d{2})/";
-                $replacement = "\$3-\$2-20\$1";
+                $replacement = "\$1-\$2-20\$3";
                 $count = 0;
                 $fileContent = preg_replace($pattern, $replacement, $fileContent, -1,  $count); 
                 $changesQuantity = $changesQuantity + $count;
                 file_put_contents(self::PATH_TO_OUTPUT_TEXTS_FOLDER . '/' . basename($path), $fileContent); // сохраним изменения в итоговом файле
             }
-            print $person->getName() . ' - ' . ($changesQuantity) . PHP_EOL;
+            print $user->getName() . ' - ' . ($changesQuantity) . PHP_EOL;
         }
     }
 }

@@ -1,7 +1,7 @@
 <?php
-namespace Person\Entities;
+namespace User\Entities;
 
-class Person
+class User
 {
     protected int $id;
     protected string $name;
